@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Literata", ui-serif, Georgia, serif;
+
+  --color-primary: #4a7c59;
+  --color-primary-light: #8ecf9e;
+  --color-background: #f8f6f2;
+  --color-surface: #ffffff;
+  --color-surface-low: #f1ede6;
+  --color-surface-container: #e8e2d8;
+  --color-surface-high: #ded6c9;
+  --color-text: #2e3230;
+  --color-text-variant: #4a4e4a;
+  --color-text-muted: #6b6358;
+  --color-error: #b83230;
+  --color-error-container: #ffdad8;
+  --color-tertiary: #705c30;
+  --color-tertiary-container: #c4a66a;
+  --color-secondary-container: #f0e8db;
+  --color-outline: #c4c8bc;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}

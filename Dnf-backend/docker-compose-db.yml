@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-dnf
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: dnf_db
+    ports:
+      - "5432:5432"
+    restart: always

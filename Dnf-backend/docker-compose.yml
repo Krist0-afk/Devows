@@ -1,0 +1,130 @@
+services:
+  redis:
+    image: redis:alpine
+    container_name: dnf-redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-dnf
+    environment:
+      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME:-admin}
+      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-adminpassword}
+      POSTGRES_DB: dnf_db
+    ports:
+      - "5433:5432"
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-dnf
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    restart: always
+
+  eureka-server:
+    build: ./eurekaserver
+    ports:
+      - "8761:8761"
+    environment:
+      - EUREKA_DEFAULT_ZONE=${EUREKA_DEFAULT_ZONE:-http://eureka-server:8761/eureka/}
+    restart: always
+
+  ms-mascota:
+    build: ./Ms-mascota
+    ports:
+      - "8081:8081"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-EstaEsUnaClaveSecretaMuyLargaParaAsegurarElTokenDeSanosYSalvos2026}
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres-db:5432/dnf_db}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-admin}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-adminpassword}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_DEFAULT_ZONE:-http://eureka-server:8761/eureka/}
+      - RABBITMQ_HOST=rabbitmq
+      - SPRING_REDIS_HOST=redis
+    depends_on:
+      - eureka-server
+      - postgres-db
+      - rabbitmq
+    restart: always
+
+  ms-usuario:
+    build: ./Ms-usuario
+    ports:
+      - "8082:8082"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-EstaEsUnaClaveSecretaMuyLargaParaAsegurarElTokenDeSanosYSalvos2026}
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres-db:5432/dnf_db}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-admin}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-adminpassword}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_DEFAULT_ZONE:-http://eureka-server:8761/eureka/}
+      - SPRING_REDIS_HOST=redis
+    depends_on:
+      - eureka-server
+      - postgres-db
+    restart: always
+
+  ms-coincidencias:
+    build: ./Ms-coincidencias
+    ports:
+      - "8083:8083"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-EstaEsUnaClaveSecretaMuyLargaParaAsegurarElTokenDeSanosYSalvos2026}
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres-db:5432/dnf_db}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-admin}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-adminpassword}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_DEFAULT_ZONE:-http://eureka-server:8761/eureka/}
+      - SPRING_REDIS_HOST=redis
+    depends_on:
+      - eureka-server
+      - postgres-db
+    restart: always
+
+  api-gateway:
+    build: ./Api-Gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-EstaEsUnaClaveSecretaMuyLargaParaAsegurarElTokenDeSanosYSalvos2026}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_DEFAULT_ZONE:-http://eureka-server:8761/eureka/}
+    depends_on:
+      - eureka-server
+    restart: always
+
+  ms-comunidad:
+    build: ./Ms-comunidad/Ms-comunidad
+    ports:
+      - "8094:8094"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-EstaEsUnaClaveSecretaMuyLargaParaAsegurarElTokenDeSanosYSalvos2026}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_DEFAULT_ZONE:-http://eureka-server:8761/eureka/}
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres-db:5432/dnf_db}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-admin}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-adminpassword}
+    depends_on:
+      - eureka-server
+      - postgres-db
+    restart: always
+
+  ms-notificaciones:
+    build: ./Ms-notificaciones/Ms-notificaciones
+    ports:
+      - "8095:8095"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-EstaEsUnaClaveSecretaMuyLargaParaAsegurarElTokenDeSanosYSalvos2026}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_DEFAULT_ZONE:-http://eureka-server:8761/eureka/}
+      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME:-tu_usuario@gmail.com}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-tu_app_password}
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    restart: always
