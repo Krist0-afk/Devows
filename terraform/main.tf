@@ -118,7 +118,7 @@ data "aws_ssm_parameter" "ecs_optimized_ami" {
 resource "aws_launch_template" "ecs_lt" {
   name_prefix   = "${var.project_name}-lt-"
   image_id      = data.aws_ssm_parameter.ecs_optimized_ami.value
-  instance_type = "t3.micro"
+  instance_type = "t3.small"
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ecs_instance_profile.name
@@ -139,9 +139,9 @@ EOF
 resource "aws_autoscaling_group" "ecs_asg" {
   name                = "${var.project_name}-asg"
   vpc_zone_identifier = data.aws_subnets.public.ids
-  min_size            = 1
-  max_size            = 2
-  desired_capacity    = 1
+  min_size            = 2
+  max_size            = 4
+  desired_capacity    = 3
 
   launch_template {
     id      = aws_launch_template.ecs_lt.id
