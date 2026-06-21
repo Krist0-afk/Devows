@@ -140,7 +140,7 @@ resource "aws_autoscaling_group" "ecs_asg" {
   name                = "${var.project_name}-asg"
   vpc_zone_identifier = data.aws_subnets.public.ids
   min_size            = 2
-  max_size            = 4
+  max_size            = 3
   desired_capacity    = 3
 
   launch_template {

@@ -16,7 +16,7 @@ resource "aws_lb_target_group" "eurekaserver" {
     unhealthy_threshold = 2
     timeout             = 5
     interval            = 30
-    matcher             = "200-399"
+    matcher             = "200-499"
   }
 }
 
@@ -144,7 +144,7 @@ resource "aws_ecs_task_definition" "ms_comunidad" {
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8084, hostPort = 0 }]
+      portMappings = [{ containerPort = 8094, hostPort = 0 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -196,7 +196,7 @@ resource "aws_ecs_task_definition" "ms_mascota" {
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8082, hostPort = 0 }]
+      portMappings = [{ containerPort = 8081, hostPort = 0 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -248,7 +248,7 @@ resource "aws_ecs_task_definition" "ms_notificaciones" {
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8085, hostPort = 0 }]
+      portMappings = [{ containerPort = 8095, hostPort = 0 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -301,7 +301,7 @@ resource "aws_ecs_task_definition" "ms_usuario" {
         { name = "JWT_SECRET", valueFrom = aws_ssm_parameter.jwt_secret.arn },
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8081, hostPort = 0 }]
+      portMappings = [{ containerPort = 8082, hostPort = 0 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -345,7 +345,7 @@ resource "aws_lb_target_group" "frontend" {
     unhealthy_threshold = 2
     timeout             = 5
     interval            = 30
-    matcher             = "200-399"
+    matcher             = "200-499"
   }
 }
 
@@ -432,7 +432,7 @@ resource "aws_lb_target_group" "api_gateway" {
     unhealthy_threshold = 2
     timeout             = 5
     interval            = 30
-    matcher             = "200-403"
+    matcher             = "200-499"
   }
 }
 

@@ -6,7 +6,6 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-
       mvc:
         routes:
           - id: ms-usuario
@@ -30,11 +29,10 @@ spring:
             predicates:
               - Path=/api/notificaciones/**
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+# La URL de Eureka se inyecta via variable de entorno EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+# definida en el Task Definition de ECS (terraform/microservices.tf).
+# NO hardcodear aquí para que funcione en todos los entornos.
 
 logging:
   level:
-    org.springframework.security: TRACE
+    org.springframework.security: DEBUG
