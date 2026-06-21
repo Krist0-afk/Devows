@@ -1,0 +1,91 @@
+name: CI/CD Devows - Backend
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'Dnf-backend/**'
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.set-matrix.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            api-gateway: 'Dnf-backend/Api-Gateway/**'
+            eurekaserver: 'Dnf-backend/eurekaserver/**'
+            ms-coincidencias: 'Dnf-backend/Ms-coincidencias/**'
+            ms-comunidad: 'Dnf-backend/Ms-comunidad/**'
+            ms-mascota: 'Dnf-backend/Ms-mascota/**'
+            ms-notificaciones: 'Dnf-backend/Ms-notificaciones/**'
+            ms-usuario: 'Dnf-backend/Ms-usuario/**'
+      - id: set-matrix
+        run: echo "changes=${{ toJSON(steps.filter.outputs.changes) }}" >> "$GITHUB_OUTPUT"
+
+  build-push-deploy-backend:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.services != '[]' && needs.detect-changes.outputs.services != '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJSON(needs.detect-changes.outputs.services) }}
+      fail-fast: false
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+        
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+          
+      - name: Login en Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        
+      - name: Set Paths and Names
+        id: vars
+        run: |
+          if [ "${{ matrix.service }}" = "api-gateway" ]; then echo "path=Dnf-backend/Api-Gateway"; 
+          elif [ "${{ matrix.service }}" = "eurekaserver" ]; then echo "path=Dnf-backend/eurekaserver";
+          elif [ "${{ matrix.service }}" = "ms-coincidencias" ]; then echo "path=Dnf-backend/Ms-coincidencias";
+          elif [ "${{ matrix.service }}" = "ms-comunidad" ]; then echo "path=Dnf-backend/Ms-comunidad/Ms-comunidad";
+          elif [ "${{ matrix.service }}" = "ms-mascota" ]; then echo "path=Dnf-backend/Ms-mascota";
+          elif [ "${{ matrix.service }}" = "ms-notificaciones" ]; then echo "path=Dnf-backend/Ms-notificaciones/Ms-notificaciones";
+          elif [ "${{ matrix.service }}" = "ms-usuario" ]; then echo "path=Dnf-backend/Ms-usuario";
+          fi >> "$GITHUB_OUTPUT"
+        
+      - name: Build imagen y push a ECR
+        run: |
+          cd ${{ steps.vars.outputs.path }}
+          docker build -t devows-project-${{ matrix.service }} .
+          docker tag devows-project-${{ matrix.service }}:latest 563092261209.dkr.ecr.us-east-1.amazonaws.com/devows-project-${{ matrix.service }}:latest
+          docker push 563092261209.dkr.ecr.us-east-1.amazonaws.com/devows-project-${{ matrix.service }}:latest
+          
+      - name: Descargar Task Definition actual
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition devows-project-${{ matrix.service }} \
+            --query taskDefinition > task-definition.json
+            
+      - name: Actualizar Tag de la imagen en la Task Def
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ matrix.service }}
+          image: 563092261209.dkr.ecr.us-east-1.amazonaws.com/devows-project-${{ matrix.service }}:latest
+          
+      - name: Desplegar nueva Task Definition en el Servicio
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+          service: devows-project-${{ matrix.service }}-service
+          cluster: devows-project-cluster
+          wait-for-service-stability: true

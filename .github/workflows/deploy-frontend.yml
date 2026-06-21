@@ -1,84 +1,52 @@
-name: Deploy Frontend to Amazon ECS
-
+name: CI/CD Devows - Frontend
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
     paths:
       - 'Dnf-frontend/**'
-      - '.github/workflows/deploy-frontend.yml'
-
-env:
-  AWS_REGION: us-east-1
-  ECR_REPOSITORY: devows-project-frontend
-  ECS_SERVICE: devows-project-frontend-service
-  ECS_CLUSTER: devows-project-cluster
-  ECS_TASK_DEFINITION: devows-project-frontend
-
 jobs:
-  deploy:
-    name: Build & Deploy
+  build-push-deploy-frontend:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: Dnf-frontend/package-lock.json
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
-
-    - name: Build, tag, and push image to Amazon ECR
-      id: build-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      working-directory: ./Dnf-frontend
-      run: |
-        # Build the Node app (if applicable, e.g., React/Angular/Vue)
-        npm ci
-        npm run build --if-present
+      - name: Checkout código
+        uses: actions/checkout@v3
         
-        # Build Docker image (assuming multi-stage Dockerfile that uses nginx)
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+          
+      - name: Login en Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
         
-        # Push to ECR
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-    - name: Download task definition
-      run: |
-        aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION }} --query taskDefinition > task-definition.json
-
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definition.json
-        container-name: frontend
-        image: ${{ steps.build-image.outputs.image }}
-
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true
+      - name: Build imagen Frontend y push a ECR
+        run: |
+          cd Dnf-frontend
+          docker build -t devows-project-frontend .
+          docker tag devows-project-frontend:latest 563092261209.dkr.ecr.us-east-1.amazonaws.com/devows-project-frontend:latest
+          docker push 563092261209.dkr.ecr.us-east-1.amazonaws.com/devows-project-frontend:latest
+          
+      - name: Descargar Task Definition actual
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition devows-project-frontend \
+            --query taskDefinition > task-definition.json
+            
+      - name: Actualizar Tag de la imagen en la Task Def
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: frontend
+          image: 563092261209.dkr.ecr.us-east-1.amazonaws.com/devows-project-frontend:latest
+          
+      - name: Desplegar nueva Task Definition en el Servicio
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+          service: devows-project-frontend-service
+          cluster: devows-project-cluster
+          wait-for-service-stability: true
