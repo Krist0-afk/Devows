@@ -3,20 +3,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Instalar pnpm
-RUN npm install -g pnpm
-
 # Copiar archivos de dependencias
-COPY package.json pnpm-lock.yaml ./
+COPY package*.json ./
 
-# Instalar dependencias
-RUN pnpm config set ignore-scripts false && pnpm install
+# Instalar dependencias usando npm
+RUN npm install
 
 # Copiar el resto del código
 COPY . .
 
 # Construir la aplicación Vite
-RUN pnpm run build
+RUN npm run build
 
 # Variables de entorno
 ENV NODE_ENV=production
