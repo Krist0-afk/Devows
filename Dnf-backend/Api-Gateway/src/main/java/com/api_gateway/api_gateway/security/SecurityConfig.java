@@ -27,11 +27,15 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authz -> authz
                 // Permitir rutas públicas
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/pets", "/api/pets/**", "/api/success-stories", "/api/success-stories/**").permitAll()
-                .requestMatchers("/api/usuarios/login").permitAll()
-                .requestMatchers("/api/usuarios").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/pets/**", "GET")).permitAll()
+                .requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/pets", "GET")).permitAll()
+                .requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/success-stories/**", "GET")).permitAll()
+                .requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/success-stories", "GET")).permitAll()
+                .requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/usuarios/login")).permitAll()
+                .requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/usuarios")).permitAll()
+                .requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-ui/**")).permitAll()
+                .requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v3/api-docs/**")).permitAll()
+                .requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/actuator/**")).permitAll()
                 // Todas las demás rutas requieren autenticación
                 .anyRequest().authenticated()
             )
@@ -55,6 +59,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/swagger-ui/**", swaggerConfig);
         source.registerCorsConfiguration("/swagger-resources/**", swaggerConfig);
         source.registerCorsConfiguration("/swagger-ui.html", swaggerConfig);
+        source.registerCorsConfiguration("/**", swaggerConfig);
         return source;
     }
 }

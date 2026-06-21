@@ -67,7 +67,7 @@ resource "aws_ecs_service" "eurekaserver" {
     container_port   = 8761
   }
 
-  lifecycle { ignore_changes = [task_definition, desired_count] }
+  lifecycle { ignore_changes = [desired_count] }
 }
 
 # ----------------- MS Coincidencias -----------------
@@ -86,7 +86,8 @@ resource "aws_ecs_task_definition" "ms_coincidencias" {
       memory    = 384
       environment = [
         { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" },
+        { name = "SPRING_DATASOURCE_USERNAME", value = "admin" }
       ]
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
@@ -118,7 +119,7 @@ resource "aws_ecs_service" "ms_coincidencias" {
     capacity_provider = aws_ecs_capacity_provider.ecs_cp.name
     weight            = 100
   }
-  lifecycle { ignore_changes = [task_definition, desired_count] }
+  lifecycle { ignore_changes = [desired_count] }
 }
 
 # ----------------- MS Comunidad -----------------
@@ -137,7 +138,8 @@ resource "aws_ecs_task_definition" "ms_comunidad" {
       memory    = 384
       environment = [
         { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" },
+        { name = "SPRING_DATASOURCE_USERNAME", value = "admin" }
       ]
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
@@ -169,7 +171,7 @@ resource "aws_ecs_service" "ms_comunidad" {
     capacity_provider = aws_ecs_capacity_provider.ecs_cp.name
     weight            = 100
   }
-  lifecycle { ignore_changes = [task_definition, desired_count] }
+  lifecycle { ignore_changes = [desired_count] }
 }
 
 # ----------------- MS Mascota -----------------
@@ -188,7 +190,8 @@ resource "aws_ecs_task_definition" "ms_mascota" {
       memory    = 384
       environment = [
         { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" },
+        { name = "SPRING_DATASOURCE_USERNAME", value = "admin" }
       ]
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
@@ -220,7 +223,7 @@ resource "aws_ecs_service" "ms_mascota" {
     capacity_provider = aws_ecs_capacity_provider.ecs_cp.name
     weight            = 100
   }
-  lifecycle { ignore_changes = [task_definition, desired_count] }
+  lifecycle { ignore_changes = [desired_count] }
 }
 
 # ----------------- MS Notificaciones -----------------
@@ -239,7 +242,8 @@ resource "aws_ecs_task_definition" "ms_notificaciones" {
       memory    = 384
       environment = [
         { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" },
+        { name = "SPRING_DATASOURCE_USERNAME", value = "admin" }
       ]
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
@@ -271,7 +275,7 @@ resource "aws_ecs_service" "ms_notificaciones" {
     capacity_provider = aws_ecs_capacity_provider.ecs_cp.name
     weight            = 100
   }
-  lifecycle { ignore_changes = [task_definition, desired_count] }
+  lifecycle { ignore_changes = [desired_count] }
 }
 
 # ----------------- MS Usuario -----------------
@@ -290,7 +294,8 @@ resource "aws_ecs_task_definition" "ms_usuario" {
       memory    = 384
       environment = [
         { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" },
+        { name = "SPRING_DATASOURCE_USERNAME", value = "admin" }
       ]
       secrets = [
         { name = "JWT_SECRET", valueFrom = aws_ssm_parameter.jwt_secret.arn },
@@ -323,7 +328,7 @@ resource "aws_ecs_service" "ms_usuario" {
     capacity_provider = aws_ecs_capacity_provider.ecs_cp.name
     weight            = 100
   }
-  lifecycle { ignore_changes = [task_definition, desired_count] }
+  lifecycle { ignore_changes = [desired_count] }
 }
 
 # ----------------- Frontend -----------------
@@ -374,6 +379,9 @@ resource "aws_ecs_task_definition" "frontend" {
       essential = true
       memory    = 256
       cpu       = 256
+      environment = [
+        { name = "VITE_SPRING_BOOT_API_URL", value = "http://${aws_lb.main.dns_name}" }
+      ]
       portMappings = [{ containerPort = 80, hostPort = 0 }]
       logConfiguration = {
         logDriver = "awslogs"
@@ -407,7 +415,7 @@ resource "aws_ecs_service" "frontend" {
     container_name   = "frontend"
     container_port   = 80
   }
-  lifecycle { ignore_changes = [task_definition, desired_count] }
+  lifecycle { ignore_changes = [desired_count] }
 }
 
 # ----------------- API Gateway -----------------
@@ -424,7 +432,7 @@ resource "aws_lb_target_group" "api_gateway" {
     unhealthy_threshold = 2
     timeout             = 5
     interval            = 30
-    matcher             = "200-399"
+    matcher             = "200-403"
   }
 }
 
@@ -457,7 +465,8 @@ resource "aws_ecs_task_definition" "api_gateway" {
       memory    = 384
       environment = [
         { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" },
+        { name = "SPRING_DATASOURCE_USERNAME", value = "admin" }
       ]
       secrets = [
         { name = "JWT_SECRET", valueFrom = aws_ssm_parameter.jwt_secret.arn },
@@ -496,5 +505,5 @@ resource "aws_ecs_service" "api_gateway" {
     container_name   = "api-gateway"
     container_port   = 8080
   }
-  lifecycle { ignore_changes = [task_definition, desired_count] }
+  lifecycle { ignore_changes = [desired_count] }
 }

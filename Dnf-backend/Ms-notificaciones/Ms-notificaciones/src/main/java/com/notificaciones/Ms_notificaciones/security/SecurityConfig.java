@@ -46,6 +46,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/swagger-ui/**", swaggerConfig);
         source.registerCorsConfiguration("/swagger-resources/**", swaggerConfig);
         source.registerCorsConfiguration("/swagger-ui.html", swaggerConfig);
+        source.registerCorsConfiguration("/**", swaggerConfig);
         return source;
     }
 }

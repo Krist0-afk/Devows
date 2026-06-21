@@ -6,22 +6,19 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# pnpm respeta el pnpm-lock.yaml del repo (instalacion reproducible) y maneja
-# mejor las optional dependencies nativas que npm.
-RUN npm install -g pnpm@9
 
-# Copiar archivos de dependencias (incluido el lockfile)
-COPY package.json pnpm-lock.yaml ./
 
-# Instalar dependencias respetando el lockfile (falla si esta desincronizado,
-# evitando drift silencioso entre package.json y el lockfile)
-RUN pnpm install --frozen-lockfile
+# Copiar archivos de dependencias
+COPY package.json package-lock.yaml* ./
+
+# Instalar dependencias
+RUN npm install
 
 # Copiar el resto del codigo
 COPY . .
 
 # Construir la aplicacion Vite
-RUN pnpm run build
+RUN npm run build
 
 # Variables de entorno
 ENV NODE_ENV=production
@@ -31,4 +28,4 @@ ENV PORT=80
 EXPOSE 80
 
 # Ejecutar el servidor BFF
-CMD ["pnpm", "exec", "tsx", "server.ts"]
+CMD ["npx", "tsx", "server.ts"]
