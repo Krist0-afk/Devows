@@ -85,7 +85,8 @@ resource "aws_ecs_task_definition" "ms_coincidencias" {
       essential = true
       memory    = 384
       environment = [
-        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" }
+        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
       ]
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
@@ -135,7 +136,8 @@ resource "aws_ecs_task_definition" "ms_comunidad" {
       essential = true
       memory    = 384
       environment = [
-        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" }
+        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
       ]
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
@@ -185,7 +187,8 @@ resource "aws_ecs_task_definition" "ms_mascota" {
       essential = true
       memory    = 384
       environment = [
-        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" }
+        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
       ]
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
@@ -235,7 +238,8 @@ resource "aws_ecs_task_definition" "ms_notificaciones" {
       essential = true
       memory    = 384
       environment = [
-        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" }
+        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
       ]
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
@@ -285,7 +289,8 @@ resource "aws_ecs_task_definition" "ms_usuario" {
       essential = true
       memory    = 384
       environment = [
-        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" }
+        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
       ]
       secrets = [
         { name = "JWT_SECRET", valueFrom = aws_ssm_parameter.jwt_secret.arn },
@@ -451,7 +456,8 @@ resource "aws_ecs_task_definition" "api_gateway" {
       essential = true
       memory    = 384
       environment = [
-        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" }
+        { name = "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", value = "http://${aws_lb.main.dns_name}:8761/eureka/" },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_instance.postgres_db.private_ip}:5432/dnf_db" }
       ]
       secrets = [
         { name = "JWT_SECRET", valueFrom = aws_ssm_parameter.jwt_secret.arn },

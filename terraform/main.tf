@@ -229,3 +229,53 @@ resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/${var.project_name}-${each.key}"
   retention_in_days = 1
 }
+
+# ==========================================
+# 7. Base de Datos en EC2 (PostgreSQL)
+# ==========================================
+resource "aws_security_group" "db_sg" {
+  name        = "${var.project_name}-db-sg"
+  description = "Security Group para Base de Datos EC2"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "postgres_db" {
+  ami           = data.aws_ssm_parameter.ecs_optimized_ami.value
+  instance_type = "t3.micro"
+  subnet_id     = data.aws_subnets.public.ids[0]
+  
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.ecs_instance_profile.name
+
+  user_data = <<-EOFUSERDATA
+#!/bin/bash
+systemctl start docker
+systemctl enable docker
+docker run -d \
+  --name postgres-db \
+  --restart always \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_PASSWORD=adminpassword \
+  -e POSTGRES_DB=dnf_db \
+  -p 5432:5432 \
+  postgres:15-alpine
+EOFUSERDATA
+
+  tags = {
+    Name = "${var.project_name}-postgres-db"
+  }
+}
