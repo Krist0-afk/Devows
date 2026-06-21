@@ -10,7 +10,7 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
 
 # Instalar dependencias
-RUN pnpm install
+RUN pnpm config set ignore-scripts false && pnpm install
 
 # Copiar el resto del código
 COPY . .
