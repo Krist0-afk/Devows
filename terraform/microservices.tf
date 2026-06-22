@@ -52,8 +52,8 @@ resource "aws_ecs_service" "eurekaserver" {
   task_definition = aws_ecs_task_definition.eurekaserver.arn
   desired_count   = 1
 
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
   deployment_controller { type = "ECS" }
 
   capacity_provider_strategy {
@@ -111,8 +111,8 @@ resource "aws_ecs_service" "ms_coincidencias" {
   task_definition = aws_ecs_task_definition.ms_coincidencias.arn
   desired_count   = 1
 
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
   deployment_controller { type = "ECS" }
 
   capacity_provider_strategy {
@@ -163,8 +163,8 @@ resource "aws_ecs_service" "ms_comunidad" {
   task_definition = aws_ecs_task_definition.ms_comunidad.arn
   desired_count   = 1
 
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
   deployment_controller { type = "ECS" }
 
   capacity_provider_strategy {
@@ -215,8 +215,8 @@ resource "aws_ecs_service" "ms_mascota" {
   task_definition = aws_ecs_task_definition.ms_mascota.arn
   desired_count   = 1
 
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
   deployment_controller { type = "ECS" }
 
   capacity_provider_strategy {
@@ -267,8 +267,8 @@ resource "aws_ecs_service" "ms_notificaciones" {
   task_definition = aws_ecs_task_definition.ms_notificaciones.arn
   desired_count   = 1
 
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
   deployment_controller { type = "ECS" }
 
   capacity_provider_strategy {
@@ -320,8 +320,8 @@ resource "aws_ecs_service" "ms_usuario" {
   task_definition = aws_ecs_task_definition.ms_usuario.arn
   desired_count   = 1
 
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
   deployment_controller { type = "ECS" }
 
   capacity_provider_strategy {
@@ -401,8 +401,8 @@ resource "aws_ecs_service" "frontend" {
   task_definition = aws_ecs_task_definition.frontend.arn
   desired_count   = 1
 
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
   deployment_controller { type = "ECS" }
 
   capacity_provider_strategy {
@@ -491,8 +491,8 @@ resource "aws_ecs_service" "api_gateway" {
   task_definition = aws_ecs_task_definition.api_gateway.arn
   desired_count   = 1
 
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
   deployment_controller { type = "ECS" }
 
   capacity_provider_strategy {
