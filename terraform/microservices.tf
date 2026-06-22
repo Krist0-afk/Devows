@@ -23,7 +23,7 @@ resource "aws_lb_target_group" "eurekaserver" {
 resource "aws_ecs_task_definition" "eurekaserver" {
   family                   = "${var.project_name}-eurekaserver"
   requires_compatibilities = ["EC2"]
-  network_mode             = "bridge"
+  network_mode             = "host"
   memory                   = "512"
   execution_role_arn       = data.aws_iam_role.lab_role.arn
 
@@ -33,7 +33,7 @@ resource "aws_ecs_task_definition" "eurekaserver" {
       image     = "${aws_ecr_repository.repos["eurekaserver"].repository_url}:latest"
       essential = true
       memory    = 512
-      portMappings = [{ containerPort = 8761, hostPort = 0 }]
+      portMappings = [{ containerPort = 8761, hostPort = 8761 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -74,7 +74,7 @@ resource "aws_ecs_service" "eurekaserver" {
 resource "aws_ecs_task_definition" "ms_coincidencias" {
   family                   = "${var.project_name}-ms-coincidencias"
   requires_compatibilities = ["EC2"]
-  network_mode             = "bridge"
+  network_mode             = "host"
   memory                   = "384"
   execution_role_arn       = data.aws_iam_role.lab_role.arn
 
@@ -92,7 +92,7 @@ resource "aws_ecs_task_definition" "ms_coincidencias" {
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8083, hostPort = 0 }]
+      portMappings = [{ containerPort = 8083, hostPort = 8083 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -126,7 +126,7 @@ resource "aws_ecs_service" "ms_coincidencias" {
 resource "aws_ecs_task_definition" "ms_comunidad" {
   family                   = "${var.project_name}-ms-comunidad"
   requires_compatibilities = ["EC2"]
-  network_mode             = "bridge"
+  network_mode             = "host"
   memory                   = "384"
   execution_role_arn       = data.aws_iam_role.lab_role.arn
 
@@ -144,7 +144,7 @@ resource "aws_ecs_task_definition" "ms_comunidad" {
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8094, hostPort = 0 }]
+      portMappings = [{ containerPort = 8094, hostPort = 8094 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -178,7 +178,7 @@ resource "aws_ecs_service" "ms_comunidad" {
 resource "aws_ecs_task_definition" "ms_mascota" {
   family                   = "${var.project_name}-ms-mascota"
   requires_compatibilities = ["EC2"]
-  network_mode             = "bridge"
+  network_mode             = "host"
   memory                   = "384"
   execution_role_arn       = data.aws_iam_role.lab_role.arn
 
@@ -196,7 +196,7 @@ resource "aws_ecs_task_definition" "ms_mascota" {
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8081, hostPort = 0 }]
+      portMappings = [{ containerPort = 8081, hostPort = 8081 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -230,7 +230,7 @@ resource "aws_ecs_service" "ms_mascota" {
 resource "aws_ecs_task_definition" "ms_notificaciones" {
   family                   = "${var.project_name}-ms-notificaciones"
   requires_compatibilities = ["EC2"]
-  network_mode             = "bridge"
+  network_mode             = "host"
   memory                   = "384"
   execution_role_arn       = data.aws_iam_role.lab_role.arn
 
@@ -248,7 +248,7 @@ resource "aws_ecs_task_definition" "ms_notificaciones" {
       secrets = [
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8095, hostPort = 0 }]
+      portMappings = [{ containerPort = 8095, hostPort = 8095 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -282,7 +282,7 @@ resource "aws_ecs_service" "ms_notificaciones" {
 resource "aws_ecs_task_definition" "ms_usuario" {
   family                   = "${var.project_name}-ms-usuario"
   requires_compatibilities = ["EC2"]
-  network_mode             = "bridge"
+  network_mode             = "host"
   memory                   = "384"
   execution_role_arn       = data.aws_iam_role.lab_role.arn
 
@@ -301,7 +301,7 @@ resource "aws_ecs_task_definition" "ms_usuario" {
         { name = "JWT_SECRET", valueFrom = aws_ssm_parameter.jwt_secret.arn },
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8082, hostPort = 0 }]
+      portMappings = [{ containerPort = 8082, hostPort = 8082 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -366,7 +366,7 @@ resource "aws_lb_listener_rule" "frontend_rule" {
 resource "aws_ecs_task_definition" "frontend" {
   family                   = "${var.project_name}-frontend"
   requires_compatibilities = ["EC2"]
-  network_mode             = "bridge"
+  network_mode             = "host"
   memory                   = "256"
   cpu                      = "256"
   execution_role_arn       = data.aws_iam_role.lab_role.arn
@@ -382,7 +382,7 @@ resource "aws_ecs_task_definition" "frontend" {
       environment = [
         { name = "VITE_SPRING_BOOT_API_URL", value = "http://${aws_lb.main.dns_name}" }
       ]
-      portMappings = [{ containerPort = 80, hostPort = 0 }]
+      portMappings = [{ containerPort = 80, hostPort = 80 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -453,7 +453,7 @@ resource "aws_lb_listener_rule" "api_gateway_rule" {
 resource "aws_ecs_task_definition" "api_gateway" {
   family                   = "${var.project_name}-api-gateway"
   requires_compatibilities = ["EC2"]
-  network_mode             = "bridge"
+  network_mode             = "host"
   memory                   = "384"
   execution_role_arn       = data.aws_iam_role.lab_role.arn
 
@@ -472,7 +472,7 @@ resource "aws_ecs_task_definition" "api_gateway" {
         { name = "JWT_SECRET", valueFrom = aws_ssm_parameter.jwt_secret.arn },
         { name = "SPRING_DATASOURCE_PASSWORD", valueFrom = aws_ssm_parameter.db_password.arn }
       ]
-      portMappings = [{ containerPort = 8080, hostPort = 0 }]
+      portMappings = [{ containerPort = 8080, hostPort = 8080 }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
